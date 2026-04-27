@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
+pd.set_option('display.max_columns', None)
+
 file_path = "train.csv"
 
 if not os.path.exists(file_path):
@@ -49,7 +51,7 @@ numeric_fill_columns = [
 
 for col in numeric_fill_columns:
     if col in df.columns:
-        df[col] = df[col].fillna(df[col].mean())
+        df[col] = df[col].fillna(df[col].mean()) # пустые значения заполняем средними
 
 # Категориальные признаки заполняем модой
 categorical_fill_columns = [
@@ -69,7 +71,6 @@ print("Количество пропусков ПОСЛЕ заполнения:"
 print(df.isnull().sum())
 print()
 
-# Cabin - сложный текстовый столбец, его можно удалить, чтобы не раздувать OHE
 columns_to_drop = []
 
 for col in ["PassengerId", "Name", "Cabin"]:
@@ -82,6 +83,8 @@ if columns_to_drop:
 print("Столбцы после удаления лишних признаков:")
 print(df.columns.tolist())
 print()
+
+# Блок нормализации
 
 numeric_columns = df.select_dtypes(include=["number"]).columns.tolist()
 
@@ -99,10 +102,7 @@ print()
 
 categorical_columns = df.select_dtypes(include=["object", "category", "bool", "str"]).columns.tolist()
 
-if "Transported" in categorical_columns:
-    categorical_columns.remove("Transported")
-
-if len(categorical_columns) > 0:
+if len(categorical_columns) > 0: # one-hot encoding
     df = pd.get_dummies(df, columns=categorical_columns, drop_first=True)
 
 if "Transported" in df.columns:
